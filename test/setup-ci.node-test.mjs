@@ -50,10 +50,13 @@ describe('setup-ci file plan', () => {
     assert(!paths.includes('.github/workflows/benchmark.yml'));
 
     const packagePatch = plan.files.find((file) => file.path === 'package.json').patch;
+    const workflow = plan.files.find((file) => file.path === '.github/workflows/ci.yml').content;
     assert.equal(packagePatch.packageManager, 'pnpm@11.5.2');
     assert.equal(packagePatch.scripts.lint, 'pnpm run lint:js && pnpm run lint:markdown');
     assert.equal(packagePatch.devDependencies.vitest, '^4.1.8');
     assert.equal(packagePatch.devDependencies['markdownlint-cli2'], '^0.22.1');
+    assert.match(workflow, /uses: pnpm\/action-setup@v6/);
+    assert.doesNotMatch(workflow, /version: 11/);
 
     const prettierIgnore = plan.files.find((file) => file.path === '.prettierignore').content;
     assert.match(prettierIgnore, /pnpm-lock\.yaml/);
