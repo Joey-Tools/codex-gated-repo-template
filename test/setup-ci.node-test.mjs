@@ -61,6 +61,8 @@ describe('setup-ci file plan', () => {
     assert.equal(packagePatch.devDependencies['markdownlint-cli2'], '^0.22.1');
     assert.match(workflow, /uses: pnpm\/action-setup@v6/);
     assert.doesNotMatch(workflow, /version: 11/);
+    assert.match(workflow, /if: \$\{\{ hashFiles\('pnpm-lock\.yaml'\) == '' \}\}/);
+    assert.match(workflow, /if: \$\{\{ hashFiles\('pnpm-lock\.yaml'\) != '' \}\}/);
     assert.match(workflow, /pnpm install --frozen-lockfile/);
     assert.match(workflow, /pnpm install --no-frozen-lockfile/);
     assert.match(eslintConfig, /\.{3}globals\.vitest/);
@@ -215,6 +217,16 @@ describe('setup-ci CLI', () => {
     );
 
     assert.match(stdout, /js-ts: HTML\/JavaScript\/TypeScript/);
+  });
+
+  it('can be imported when argv[1] is not a file path', async () => {
+    const cwd = path.join(import.meta.dirname, '..');
+
+    await execFileAsync(
+      process.execPath,
+      ['--input-type=module', '-e', "await import('./scripts/setup-ci.mjs');", 'js-ts'],
+      { cwd },
+    );
   });
 });
 

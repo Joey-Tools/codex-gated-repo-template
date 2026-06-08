@@ -670,6 +670,12 @@ function nodeToolingJob(selected) {
         with:
           run_install: false
       - name: Set up Node
+        if: \${{ hashFiles('pnpm-lock.yaml') == '' }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Set up Node with pnpm cache
+        if: \${{ hashFiles('pnpm-lock.yaml') != '' }}
         uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -1129,10 +1135,17 @@ function isDirectRun() {
     return false;
   }
 
-  return (
-    realpathSync.native(fileURLToPath(import.meta.url)) ===
-    realpathSync.native(path.resolve(process.argv[1]))
-  );
+  try {
+    return (
+      realpathSync.native(fileURLToPath(import.meta.url)) ===
+      realpathSync.native(path.resolve(process.argv[1]))
+    );
+  } catch (error) {
+    if (error?.code === 'ENOENT') {
+      return false;
+    }
+    throw error;
+  }
 }
 
 if (isDirectRun()) {
