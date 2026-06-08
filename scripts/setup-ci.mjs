@@ -738,7 +738,7 @@ function swiftJob() {
           [ -d Tests ] && swift_paths+=(Tests)
 
           swift-format lint --recursive "\${swift_paths[@]}"
-          swiftlint lint --strict
+          swiftlint lint --strict --no-cache
           swift test`;
 }
 
@@ -898,6 +898,11 @@ export default {
 function prettierIgnore() {
   return `# ${GENERATED_BY}
 node_modules/
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+bun.lock
+bun.lockb
 dist/
 build/
 out/
@@ -969,16 +974,9 @@ function markdownlintConfig() {
   return `{
   "config": {
     "default": true,
-    "MD013": false
+    "MD013": false,
   },
-  "globs": [
-    "**/*.md",
-    "!node_modules",
-    "!dist",
-    "!build",
-    "!out",
-    "!target"
-  ]
+  "globs": ["**/*.md", "!node_modules", "!dist", "!build", "!out", "!target"],
 }
 `;
 }

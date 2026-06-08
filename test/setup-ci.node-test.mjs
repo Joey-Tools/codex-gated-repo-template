@@ -54,6 +54,9 @@ describe('setup-ci file plan', () => {
     assert.equal(packagePatch.scripts.lint, 'pnpm run lint:js && pnpm run lint:markdown');
     assert.equal(packagePatch.devDependencies.vitest, '^4.1.8');
     assert.equal(packagePatch.devDependencies['markdownlint-cli2'], '^0.22.1');
+
+    const prettierIgnore = plan.files.find((file) => file.path === '.prettierignore').content;
+    assert.match(prettierIgnore, /pnpm-lock\.yaml/);
   });
 
   it('limits benchmark commands to benchmarkable selected modules', () => {
@@ -73,12 +76,27 @@ describe('setup-ci file plan', () => {
     assert.doesNotMatch(workflow, /hadolint\/hadolint:latest hadolint/);
   });
 
+  it('generates a Prettier-friendly markdownlint config', () => {
+    const plan = buildFilePlan({ tools: ['markdown'], benchmark: false });
+    const config = plan.files.find((file) => file.path === '.markdownlint-cli2.jsonc').content;
+
+    assert.match(config, /"MD013": false,/);
+    assert.match(config, /"globs": \["\*\*\/\*\.md", "!node_modules", "!dist", "!build", "!out", "!target"\],/);
+  });
+
   it('skips pytest before invoking it when the tests directory is missing', () => {
     const plan = buildFilePlan({ tools: ['python'], benchmark: false });
     const workflow = plan.files.find((file) => file.path === '.github/workflows/ci.yml').content;
 
     assert.match(workflow, /if \[ ! -d tests \]; then/);
     assert.match(workflow, /No tests\/ directory found; skipping pytest\./);
+  });
+
+  it('disables SwiftLint cache in generated CI', () => {
+    const plan = buildFilePlan({ tools: ['swift'], benchmark: false });
+    const workflow = plan.files.find((file) => file.path === '.github/workflows/ci.yml').content;
+
+    assert.match(workflow, /swiftlint lint --strict --no-cache/);
   });
 });
 
