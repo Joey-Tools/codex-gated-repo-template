@@ -392,7 +392,7 @@ function buildPackagePatch(selected) {
   if (selected.has('js-ts')) {
     Object.assign(devDependencies, {
       '@eslint/js': '^10.0.1',
-      '@types/node': '^25.9.2',
+      '@types/node': '^24.13.1',
       eslint: '^10.4.1',
       globals: '^17.6.0',
       prettier: '^3.8.3',
@@ -774,12 +774,15 @@ function goJob() {
           fi
 
           mapfile -t go_files < <(find . -type f -name '*.go' -not -path './vendor/*' -not -path './.git/*')
-          if [ "\${#go_files[@]}" -gt 0 ]; then
-            unformatted="$(gofmt -l "\${go_files[@]}")"
-            if [ -n "$unformatted" ]; then
-              echo "$unformatted"
-              exit 1
-            fi
+          if [ "\${#go_files[@]}" -eq 0 ]; then
+            echo "No Go files found; skipping Go checks."
+            exit 0
+          fi
+
+          unformatted="$(gofmt -l "\${go_files[@]}")"
+          if [ -n "$unformatted" ]; then
+            echo "$unformatted"
+            exit 1
           fi
 
           go vet ./...

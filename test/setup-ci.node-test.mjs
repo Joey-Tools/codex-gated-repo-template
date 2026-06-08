@@ -57,6 +57,7 @@ describe('setup-ci file plan', () => {
     const eslintConfig = plan.files.find((file) => file.path === 'eslint.config.mjs').content;
     assert.equal(packagePatch.packageManager, 'pnpm@11.5.2');
     assert.equal(packagePatch.scripts.lint, 'pnpm run lint:js && pnpm run lint:markdown');
+    assert.equal(packagePatch.devDependencies['@types/node'], '^24.13.1');
     assert.equal(packagePatch.devDependencies.vitest, '^4.1.8');
     assert.equal(packagePatch.devDependencies['markdownlint-cli2'], '^0.22.1');
     assert.match(workflow, /uses: pnpm\/action-setup@v6/);
@@ -89,6 +90,15 @@ describe('setup-ci file plan', () => {
 
     assert.match(workflow, /hadolint\/hadolint:latest "\$\{dockerfiles\[@\]\}"/);
     assert.doesNotMatch(workflow, /hadolint\/hadolint:latest hadolint/);
+  });
+
+  it('skips Go checks before vet and test when no Go files exist', () => {
+    const plan = buildFilePlan({ tools: ['go'], benchmark: false });
+    const workflow = plan.files.find((file) => file.path === '.github/workflows/ci.yml').content;
+
+    assert.match(workflow, /No Go files found; skipping Go checks\./);
+    assert.match(workflow, /go vet \.\/\.\.\./);
+    assert.match(workflow, /go test \.\/\.\.\./);
   });
 
   it('generates a Prettier-friendly markdownlint config', () => {
