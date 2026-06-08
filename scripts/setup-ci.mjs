@@ -675,7 +675,12 @@ function nodeToolingJob(selected) {
           node-version: 24
           cache: pnpm
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm install --frozen-lockfile
+          else
+            pnpm install --no-frozen-lockfile
+          fi
 ${steps.join('\n')}`;
 }
 
@@ -689,9 +694,9 @@ function pythonJob() {
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: '3.12'
       - name: Set up uv
-        uses: astral-sh/setup-uv@v8
+        uses: astral-sh/setup-uv@v8.1.0
       - name: Install dependencies
         run: uv sync --group dev
       - name: Check Python formatting
@@ -934,6 +939,7 @@ export default tseslint.config(
       globals: {
         ...globals.browser,
         ...globals.node,
+        ...globals.vitest,
       },
     },
   },

@@ -54,12 +54,16 @@ describe('setup-ci file plan', () => {
 
     const packagePatch = plan.files.find((file) => file.path === 'package.json').patch;
     const workflow = plan.files.find((file) => file.path === '.github/workflows/ci.yml').content;
+    const eslintConfig = plan.files.find((file) => file.path === 'eslint.config.mjs').content;
     assert.equal(packagePatch.packageManager, 'pnpm@11.5.2');
     assert.equal(packagePatch.scripts.lint, 'pnpm run lint:js && pnpm run lint:markdown');
     assert.equal(packagePatch.devDependencies.vitest, '^4.1.8');
     assert.equal(packagePatch.devDependencies['markdownlint-cli2'], '^0.22.1');
     assert.match(workflow, /uses: pnpm\/action-setup@v6/);
     assert.doesNotMatch(workflow, /version: 11/);
+    assert.match(workflow, /pnpm install --frozen-lockfile/);
+    assert.match(workflow, /pnpm install --no-frozen-lockfile/);
+    assert.match(eslintConfig, /\.{3}globals\.vitest/);
 
     const prettierIgnore = plan.files.find((file) => file.path === '.prettierignore').content;
     assert.match(prettierIgnore, /pnpm-lock\.yaml/);
@@ -100,6 +104,8 @@ describe('setup-ci file plan', () => {
     const plan = buildFilePlan({ tools: ['python'], benchmark: false });
     const workflow = plan.files.find((file) => file.path === '.github/workflows/ci.yml').content;
 
+    assert.match(workflow, /uses: astral-sh\/setup-uv@v8\.1\.0/);
+    assert.match(workflow, /python-version: '3\.12'/);
     assert.match(workflow, /if \[ ! -d tests \]; then/);
     assert.match(workflow, /No tests\/ directory found; skipping pytest\./);
   });
