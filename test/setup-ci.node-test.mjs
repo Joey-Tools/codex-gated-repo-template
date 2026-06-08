@@ -39,7 +39,10 @@ describe('setup-ci argument parsing', () => {
 
 describe('setup-ci file plan', () => {
   it('builds Node, Markdown, and benchmark files without a benchmark workflow', () => {
-    const plan = buildFilePlan({ tools: ['js-ts', 'markdown'], benchmark: true });
+    const plan = buildFilePlan({
+      tools: ['js-ts', 'markdown'],
+      benchmark: true,
+    });
     const paths = plan.files.map((file) => file.path);
 
     assert(paths.includes('.github/workflows/ci.yml'));
@@ -63,7 +66,10 @@ describe('setup-ci file plan', () => {
   });
 
   it('limits benchmark commands to benchmarkable selected modules', () => {
-    const plan = buildFilePlan({ tools: ['swift', 'go', 'rust'], benchmark: true });
+    const plan = buildFilePlan({
+      tools: ['swift', 'go', 'rust'],
+      benchmark: true,
+    });
     const benchmark = plan.files.find((file) => file.path === 'scripts/benchmark.sh').content;
 
     assert.match(benchmark, /Go benchmarks/);
@@ -84,7 +90,10 @@ describe('setup-ci file plan', () => {
     const config = plan.files.find((file) => file.path === '.markdownlint-cli2.jsonc').content;
 
     assert.match(config, /"MD013": false,/);
-    assert.match(config, /"globs": \["\*\*\/\*\.md", "!node_modules", "!dist", "!build", "!out", "!target"\],/);
+    assert.match(
+      config,
+      /"globs": \["\*\*\/\*\.md", "!node_modules", "!dist", "!build", "!out", "!target"\],/,
+    );
   });
 
   it('skips pytest before invoking it when the tests directory is missing', () => {
@@ -160,9 +169,18 @@ describe('setup-ci file application', () => {
     const cwd = await tempDir();
     const plan = buildFilePlan({ tools: ['docker'], benchmark: false });
     let output = '';
-    const stdout = { write: (chunk) => { output += chunk; } };
+    const stdout = {
+      write: (chunk) => {
+        output += chunk;
+      },
+    };
 
-    const result = await applyFilePlan({ cwd, files: plan.files, dryRun: true, stdout });
+    const result = await applyFilePlan({
+      cwd,
+      files: plan.files,
+      dryRun: true,
+      stdout,
+    });
 
     assert(result.changed.includes('.hadolint.yaml'));
     assert.match(output, /\[dry-run\] write \.hadolint\.yaml/);
@@ -182,12 +200,13 @@ describe('setup-ci CLI', () => {
       path.join(scriptDir, 'setup-ci.mjs'),
     );
 
-    const { stdout } = await execFileAsync(process.execPath, [
-      path.join(scriptDir, 'setup-ci.mjs'),
-      '--list',
-    ], {
-      cwd: workDir,
-    });
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      [path.join(scriptDir, 'setup-ci.mjs'), '--list'],
+      {
+        cwd: workDir,
+      },
+    );
 
     assert.match(stdout, /js-ts: HTML\/JavaScript\/TypeScript/);
   });

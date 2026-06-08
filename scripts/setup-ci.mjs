@@ -61,23 +61,11 @@ export const TOOL_DEFINITIONS = {
   },
 };
 
-const COMMON_IGNORES = [
-  '.cache/',
-  'coverage/',
-  '.coverage',
-  '*.log',
-];
+const COMMON_IGNORES = ['.cache/', 'coverage/', '.coverage', '*.log'];
 
 const TOOL_IGNORES = {
   'js-ts': ['node_modules/', 'dist/', 'build/', 'out/', 'coverage/'],
-  python: [
-    '.venv/',
-    '.ruff_cache/',
-    '.pytest_cache/',
-    '.pyright/',
-    '__pycache__/',
-    '*.py[cod]',
-  ],
+  python: ['.venv/', '.ruff_cache/', '.pytest_cache/', '.pyright/', '__pycache__/', '*.py[cod]'],
   swift: ['.build/', '.swiftpm/', 'DerivedData/'],
   go: ['bin/', 'coverage.out'],
   rust: ['target/'],
@@ -218,7 +206,9 @@ export async function runCli({
 
     if (tools.length === 0) {
       if (!stdin.isTTY || !stdout.isTTY) {
-        throw new UsageError('No tools selected. Pass --tool, --all, or run interactively in a TTY.');
+        throw new UsageError(
+          'No tools selected. Pass --tool, --all, or run interactively in a TTY.',
+        );
       }
       const interactive = await promptForSelection({ stdin, stdout });
       tools = interactive.tools;
@@ -259,7 +249,9 @@ async function promptForSelection({ stdin, stdout }) {
   try {
     stdout.write('Supported tool modules:\n');
     stdout.write(`${listTools()}\n\n`);
-    const selected = await rl.question('Select tools by name or number, comma-separated (default: all): ');
+    const selected = await rl.question(
+      'Select tools by name or number, comma-separated (default: all): ',
+    );
     const tools = parseInteractiveSelection(selected);
     const benchmarkAnswer = await rl.question('Generate scripts/benchmark.sh? [y/N]: ');
     const benchmark = /^y(es)?$/i.test(benchmarkAnswer.trim());
@@ -450,7 +442,13 @@ function buildGitignoreEntries(selected) {
   return [...entries].sort();
 }
 
-export async function applyFilePlan({ cwd, files, dryRun = false, force = false, stdout = process.stdout }) {
+export async function applyFilePlan({
+  cwd,
+  files,
+  dryRun = false,
+  force = false,
+  stdout = process.stdout,
+}) {
   const prepared = [];
   const conflicts = [];
 
@@ -483,7 +481,9 @@ export async function applyFilePlan({ cwd, files, dryRun = false, force = false,
   }
 
   if (conflicts.length > 0) {
-    throw new Error(`Refusing to overwrite conflicting files:\n${conflicts.map((item) => `- ${item}`).join('\n')}`);
+    throw new Error(
+      `Refusing to overwrite conflicting files:\n${conflicts.map((item) => `- ${item}`).join('\n')}`,
+    );
   }
 
   const changed = [];
@@ -566,12 +566,17 @@ function mergeJsonFile(existing, patch, { force }) {
       if (force) {
         merged[key] = patch[key];
       } else {
-        conflicts.push(`package.json packageManager is ${JSON.stringify(merged[key])}, expected ${JSON.stringify(patch[key])}`);
+        conflicts.push(
+          `package.json packageManager is ${JSON.stringify(merged[key])}, expected ${JSON.stringify(patch[key])}`,
+        );
       }
     }
   }
 
-  merged.scripts = mergeObjectField('package.json scripts', merged.scripts, patch.scripts, { force, conflicts });
+  merged.scripts = mergeObjectField('package.json scripts', merged.scripts, patch.scripts, {
+    force,
+    conflicts,
+  });
   merged.devDependencies = mergeObjectField(
     'package.json devDependencies',
     merged.devDependencies,
@@ -643,9 +648,7 @@ ${jobs.join('\n\n')}
 }
 
 function nodeToolingJob(selected) {
-  const steps = [
-    step('Check formatting', 'pnpm run format:check'),
-  ];
+  const steps = [step('Check formatting', 'pnpm run format:check')];
   if (selected.has('js-ts')) {
     steps.push(step('Lint JavaScript and TypeScript', 'pnpm run lint:js'));
   }
