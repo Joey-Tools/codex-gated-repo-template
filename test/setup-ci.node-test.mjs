@@ -95,8 +95,11 @@ describe('setup-ci file plan', () => {
   it('disables SwiftLint cache in generated CI', () => {
     const plan = buildFilePlan({ tools: ['swift'], benchmark: false });
     const workflow = plan.files.find((file) => file.path === '.github/workflows/ci.yml').content;
+    const config = plan.files.find((file) => file.path === '.swiftlint.yml').content;
 
+    assert.match(workflow, /swift-format lint --strict --recursive/);
     assert.match(workflow, /swiftlint lint --strict --no-cache/);
+    assert.match(config, /disabled_rules:\n  - trailing_comma/);
   });
 });
 

@@ -737,7 +737,7 @@ function swiftJob() {
           [ -d Sources ] && swift_paths+=(Sources)
           [ -d Tests ] && swift_paths+=(Tests)
 
-          swift-format lint --recursive "\${swift_paths[@]}"
+          swift-format lint --strict --recursive "\${swift_paths[@]}"
           swiftlint lint --strict --no-cache
           swift test`;
 }
@@ -1030,6 +1030,8 @@ included:
 excluded:
   - .build
   - .swiftpm
+disabled_rules:
+  - trailing_comma
 line_length:
   warning: 120
   error: 160
