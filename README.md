@@ -13,9 +13,11 @@ repository is created from the template.
 - this README
 
 The workflow writes the `codex/review-gate` status check and requests a controlled
-Codex review marker for each ready pull request head. It pins
-`JoeyTeng/codex-review-gate-action` to the v1.2.1 commit SHA so privileged
-`pull_request_target` runs do not depend on a movable tag.
+Codex review marker for each ready pull request head. Its privileged
+`pull_request_target` run uses `JoeyTeng/codex-review-gate-action@v1`.
+This floating major-version reference is intentional: the action and template
+share the same trusted maintainer, and automatic compatible v1 updates are
+preferred over per-release SHA updates.
 
 ## Generate Project CI
 
