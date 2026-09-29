@@ -10,6 +10,7 @@ repository is created from the template.
 - `.github/workflows/codex-review-gate.yml` (read-only pull-request verifier)
 - `.github/workflows/codex-review-gate-controller.yml` (review-event and manual controller)
 - `.github/CODEOWNERS` (control-plane ownership)
+- `rulesets/codex-review-gate.json` (Disabled v2 ruleset import template)
 - `.gitignore`
 - `scripts/setup-ci.mjs`
 - this README
@@ -19,6 +20,8 @@ The verifier uses `JoeyTeng/codex-review-gate-action@v2` and produces the native
 controller handles official Codex comments and exact-head manual reconciliation;
 it has no scheduled job. The floating major-version reference is intentional:
 compatible v2 releases can reach consumers without changing each repository.
+The included ruleset file is only an import template; copying it does not
+activate repository protection.
 
 ## Generate Project CI
 
@@ -67,7 +70,8 @@ Rust when those modules are selected.
 4. Confirm both gate workflows and `.github/CODEOWNERS` are on the default
    branch. Set the control-plane owner in CODEOWNERS to an eligible maintainer.
 5. Follow the [canonical v2 installation guide](https://github.com/Joey-Tools/codex-review-gate/blob/master/docs/install/human.md):
-   stage the v2 ruleset as Disabled, verify `codex/github-review-gate` with a
+   import or stage `rulesets/codex-review-gate.json` as Disabled, verify
+   `codex/github-review-gate` with a
    separate harmless canary PR, then activate and read back the ruleset. Do not
    require the v2 check while its workflow exists only on a feature branch.
    If migrating an existing v1 repository, keep the old requirement active
