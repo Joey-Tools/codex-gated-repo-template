@@ -1,23 +1,27 @@
 # Codex-Gated Repository Template
 
-This template starts a repository with the Codex review gate workflow already on
+This template starts a repository with the Codex review gate v2 workflows on
 the default branch. It also includes a modular CI generator for adding
 project-specific formatter, linter, test, and benchmark entrypoints after a
 repository is created from the template.
 
 ## Included
 
-- `.github/workflows/codex-review-gate.yml`
+- `.github/workflows/codex-review-gate.yml` (read-only pull-request verifier)
+- `.github/workflows/codex-review-gate-controller.yml` (review-event and manual controller)
+- `.github/CODEOWNERS` (control-plane ownership)
+- `rulesets/codex-review-gate.json` (Disabled v2 ruleset import template)
 - `.gitignore`
 - `scripts/setup-ci.mjs`
 - this README
 
-The workflow writes the `codex/review-gate` status check and requests a controlled
-Codex review marker for each ready pull request head. Its privileged
-`pull_request_target` run uses `JoeyTeng/codex-review-gate-action@v1`.
-This floating major-version reference is intentional: the action and template
-share the same trusted maintainer, and automatic compatible v1 updates are
-preferred over per-release SHA updates.
+The verifier uses `JoeyTeng/codex-review-gate-action@v2` and produces the native
+`codex/github-review-gate` check for each ready pull request head. The separate
+controller handles official Codex comments and exact-head manual reconciliation;
+it has no scheduled job. The floating major-version reference is intentional:
+compatible v2 releases can reach consumers without changing each repository.
+The included ruleset file is only an import template; copying it does not
+activate repository protection.
 
 ## Generate Project CI
 
@@ -63,31 +67,22 @@ Rust when those modules are selected.
 2. Run `node scripts/setup-ci.mjs` and commit the generated CI/tooling files.
 3. Install or lock generated dependencies where applicable, such as `pnpm install`
    for JavaScript/TypeScript or Markdown modules.
-4. Confirm `.github/workflows/codex-review-gate.yml` is present on the default
-   branch before requiring the status check.
-5. Enable the required status check with the bootstrap helper from
-   `JoeyTeng/codex-review-gate`:
-
-```bash
-node scripts/bootstrap-codex-review-gate.mjs --repo OWNER/REPO
-node scripts/bootstrap-codex-review-gate.mjs --repo OWNER/REPO --apply
-```
-
-The helper defaults to dry-run. It refuses to require `codex/review-gate` until
-the workflow exists on the repository default branch.
+4. Confirm both gate workflows and `.github/CODEOWNERS` are on the default
+   branch. Set the control-plane owner in CODEOWNERS to an eligible maintainer.
+5. Follow the [canonical v2 installation guide](https://github.com/Joey-Tools/codex-review-gate/blob/master/docs/install/human.md):
+   import or stage `rulesets/codex-review-gate.json` as Disabled, verify
+   `codex/github-review-gate` with a
+   separate harmless canary PR, then activate and read back the ruleset. Do not
+   require the v2 check while its workflow exists only on a feature branch.
+   If migrating an existing v1 repository, keep the old requirement active
+   until the v2 ruleset is verified Active, then remove only the legacy gate.
 
 ## Optional Repository Variables
 
-- `CODEX_REVIEW_GATE_RUNNER_LABELS`: JSON runner label array. Defaults to
-  `["ubuntu-slim"]`; use `["ubuntu-latest"]` when `ubuntu-slim` is unavailable.
-- `CODEX_REVIEW_GATE_AUTO_RETRY=false`: disables scheduled retry jobs before a
-  runner is allocated.
-- `CODEX_REVIEW_GATE_EVENT_MODE`: `standard`, `comment-only`, or `full`.
-- `CODEX_REVIEW_GATE_BOT_LOGINS`: comma-separated additional Codex bot logins.
-- `CODEX_REVIEW_GATE_COMPLETION_SIGNAL_BUFFER_SECONDS`: clean completion buffer.
-- `CODEX_REVIEW_GATE_FAILED_FINDINGS_RECOVERY`: set to `false` to disable
-  same-head recovery after resolved Codex findings.
-- `CODEX_REVIEW_GATE_FAILED_FINDINGS_RECOVERY_MODE`: `head` or `fresh`.
+- `CODEX_REVIEW_GATE_USE_UBUNTU_LATEST=true`: use `ubuntu-latest` when the
+  default `ubuntu-slim` runner is unsuitable.
+- `CODEX_REVIEW_GATE_LIMITS_PROFILE=expanded`: raise the bounded scan profile
+  for repositories with exceptionally large pull requests (default: `default`).
 
 ## Template Maintenance
 
