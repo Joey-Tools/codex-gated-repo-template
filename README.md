@@ -77,12 +77,18 @@ Rust when those modules are selected.
    If migrating an existing v1 repository, keep the old requirement active
    until the v2 ruleset is verified Active, then remove only the legacy gate.
 
-## Optional Repository Variables
+## Optional GitHub Actions Variables
 
+- `CODEX_REVIEW_GATE_AUTO_REQUEST=true`: opt in to automatic Codex review
+  requests after a ready PR's verifier fails. It is disabled by default. The
+  action refetches the PR and rejects drafts before posting a request.
 - `CODEX_REVIEW_GATE_USE_UBUNTU_LATEST=true`: use `ubuntu-latest` when the
   default `ubuntu-slim` runner is unsuitable.
 - `CODEX_REVIEW_GATE_LIMITS_PROFILE=expanded`: raise the bounded scan profile
   for repositories with exceptionally large pull requests (default: `default`).
+
+Set these as organization or repository Actions variables; a repository value
+overrides an organization value with the same name.
 
 ## Template Maintenance
 
